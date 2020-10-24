@@ -19,6 +19,7 @@
  */
 
 #include<SDL.h>
+#include<SDL_image.h>
 #include<cstdio>
 #include<cstdlib>
 #include<cassert>
@@ -41,8 +42,11 @@ const char startup_file[] = "res/startup.wav";
 const char explode_file[] = "res/explode.wav";
 
 SDL_Texture* unpack_image(SDL_Renderer *rend, const char* fname) {
-    SDL_Surface *s(SDL_LoadBMP(fname));
-    assert(s);
+    SDL_Surface *s = IMG_Load(fname);
+    if(!s) {
+        printf("IMG_Load: %s\n", IMG_GetError());
+        std::abort();
+    }
     SDL_Texture *tex = SDL_CreateTextureFromSurface(rend, s);
     SDL_FreeSurface(s);
     return tex;
@@ -144,8 +148,8 @@ void draw_single(SDL_Renderer *rend, SDL_Texture *tex, const double ratio) {
     SDL_Rect r;
     int centerx = SCREEN_WIDTH/2;
     int centery = SCREEN_HEIGHT/2;
-    r.x = centerx - texw/2 + SCREEN_WIDTH*0.4*sin(2*M_PI*ratio);
-    r.y = centery - texh/2 + SCREEN_HEIGHT*0.4*cos(2*2*M_PI*(ratio) + M_PI/2);
+    r.x = int(centerx - texw/2 + SCREEN_WIDTH*0.4*sin(2*M_PI*ratio));
+    r.y = int(centery - texh/2 + SCREEN_HEIGHT*0.4*cos(2*2*M_PI*(ratio) + M_PI/2));
     r.w = texw;
     r.h = texh;
     auto rc = SDL_RenderCopy(rend, tex, nullptr, &r);
@@ -207,6 +211,13 @@ int main(int argc, char *argv[]) {
     if(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS | SDL_INIT_GAMECONTROLLER |
             SDL_INIT_JOYSTICK | SDL_INIT_AUDIO) != 0) {
         fprintf(stderr, "Could not initialize SDL: %s\n", SDL_GetError());
+        return 1;
+    }
+    int flags=IMG_INIT_PNG;
+    int initted=IMG_Init(flags);
+    if((initted&flags) != flags) {
+        printf("IMG_Init: Failed to init required image support!\n");
+        printf("IMG_Init: %s\n", IMG_GetError());
         return 1;
     }
     SDL_LogSetPriority(SDL_LOG_CATEGORY_APPLICATION, SDL_LOG_PRIORITY_DEBUG);

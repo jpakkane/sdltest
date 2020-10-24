@@ -4,7 +4,8 @@ project('SDL test', 'cpp', version: '1.0.0',
                      'buildtype=debugoptimized'])
 
 sdl2_dep = dependency('sdl2')
+sdl2_image_dep = dependency('sdl2_image')
 
 executable('sdltestapp', 'main.cpp',
-  dependencies : [sdl2_dep],
+  dependencies : [sdl2_image_dep, sdl2_dep],
   win_subsystem: 'windows')
