@@ -20,6 +20,7 @@
 
 #include<SDL.h>
 #include<SDL_image.h>
+#include<SDL_Mixer.h>
 #include<cstdio>
 #include<cstdlib>
 #include<cassert>
@@ -28,7 +29,6 @@
 const int SCREEN_WIDTH = 1920/2;
 const int SCREEN_HEIGHT = 1080/2;
 const uint32_t FTIME = (1000/60);
-SDL_AudioSpec want, have;
 
 // For simplicity.
 const int texw = 100;
@@ -52,9 +52,10 @@ SDL_Texture* unpack_image(SDL_Renderer *rend, const char* fname) {
     return tex;
 }
 
-void unpack_wav(const char *fname, Uint8 **audio_buf, Uint32 *audio_len) {
-    SDL_AudioSpec *res = SDL_LoadWAV(fname, &want, audio_buf, audio_len);
+Mix_Chunk* unpack_wav(const char *fname) {
+    Mix_Chunk *res = Mix_LoadWAV(fname);
     assert(res);
+    return res;
 }
 
 template<typename T>
@@ -79,12 +80,8 @@ struct audiocontrol {
         }
     }
 
-    void play_sample(Uint8 *new_sample, Uint32 new_size) {
-        SDL_LockMutex(m);
-        sample = new_sample;
-        sample_size = new_size;
-        played_bytes = 0;
-        SDL_UnlockMutex(m);
+    void play_sample(Mix_Chunk *sample) {
+        Mix_PlayChannel(-1, sample, 0);
     }
 
     void produce(Uint8 *stream, int len) {
@@ -107,12 +104,9 @@ struct resources {
     SDL_Texture*red_tex;
     SDL_Texture*green_tex;
 
-    Uint8* startup_sound;
-    Uint32 startup_size;
-    Uint8* shoot_sound;
-    Uint32 shoot_size;
-    Uint8* explode_sound;
-    Uint32 explode_size;
+    Mix_Chunk* startup_sound;
+    Mix_Chunk* shoot_sound;
+    Mix_Chunk* explode_sound;
 
     resources(SDL_Renderer *rend) : blue_tex(unpack_image(rend, blue_file)),
             red_tex(unpack_image(rend, red_file)),
@@ -121,20 +115,15 @@ struct resources {
         assert(red_tex);
         assert(green_tex);
         Uint8 *tmp = nullptr;
-        unpack_wav(startup_file, &tmp, &startup_size);
-        startup_sound = tmp;
-        tmp = nullptr;
-        unpack_wav(shoot_file, &tmp, &shoot_size);
-        shoot_sound = tmp;
-        tmp=nullptr;
-        unpack_wav(explode_file, &tmp, &explode_size);
-        explode_sound = tmp;
+        startup_sound = unpack_wav(startup_file);
+        shoot_sound = unpack_wav(shoot_file);
+        explode_sound = unpack_wav(explode_file);
     }
 
     ~resources() {
-        SDL_FreeWAV(explode_sound);
-        SDL_FreeWAV(shoot_sound);
-        SDL_FreeWAV(startup_sound);
+        Mix_FreeChunk(explode_sound);
+        Mix_FreeChunk(shoot_sound);
+        Mix_FreeChunk(startup_sound);
     }
 };
 
@@ -175,7 +164,7 @@ void mainloop(SDL_Window *win, SDL_Renderer *rend, audiocontrol &control) {
     SDL_RendererInfo f;
     SDL_GetRendererInfo(rend, &f);
     int has_vsync = f.flags & SDL_RENDERER_PRESENTVSYNC;
-    control.play_sample(res.startup_sound, res.startup_size);
+    control.play_sample(res.startup_sound);
     SDL_PauseAudioDevice(control.dev, 0);
     while(true) {
         while(SDL_PollEvent(&e)) {
@@ -187,9 +176,9 @@ void mainloop(SDL_Window *win, SDL_Renderer *rend, audiocontrol &control) {
                 case  SDLK_q:
                     return;
                 }
-                control.play_sample(res.explode_sound, res.explode_size);
+                control.play_sample(res.explode_sound);
             } else if(e.type == SDL_JOYBUTTONDOWN || e.type == SDL_MOUSEBUTTONDOWN) {
-                control.play_sample(res.shoot_sound, res.shoot_size);
+                control.play_sample(res.shoot_sound);
             }
         }
         render(rend, res, ((SDL_GetTicks() - start_time) % cycle)/double(cycle));
@@ -220,6 +209,17 @@ int main(int argc, char *argv[]) {
         printf("IMG_Init: %s\n", IMG_GetError());
         return 1;
     }
+    flags=MIX_INIT_OGG;
+    initted=Mix_Init(flags);
+    if(initted&flags != flags) {
+        printf("Mix_Init: Failed to init required ogg and mod support!\n");
+        printf("Mix_Init: %s\n", Mix_GetError());
+        return 1;
+    }
+    if(Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 1024)==-1) {
+        printf("Mix_OpenAudio: %s\n", Mix_GetError());
+        return 1;
+    }
     SDL_LogSetPriority(SDL_LOG_CATEGORY_APPLICATION, SDL_LOG_PRIORITY_DEBUG);
     atexit(SDL_Quit);
 #if defined(_MSC_VER)
@@ -242,15 +242,6 @@ int main(int argc, char *argv[]) {
         }
     }
     audiocontrol control;
-    // All our wav files are in this format so hardcode it and have SDL do all conversions.
-    want.freq = 44100;
-    want.format = AUDIO_S16LSB;
-    want.channels = 1;
-    want.samples = 4096;
-    want.callback = audiocallback;
-    want.userdata = &control;
-    control.dev = SDL_OpenAudioDevice(nullptr, 0, &want, &have, 0);
-    assert(control.dev);
 
     mainloop(win, rend, control);
     SDL_DestroyRenderer(rend);
