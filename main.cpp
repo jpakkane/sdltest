@@ -35,7 +35,7 @@ const int texw = 100;
 const int texh = 100;
 
 const char blue_file[] = "res/blue.png";
-const char green_file[] = "res/green.bmp";
+const char green_file[] = "res/green.jpg";
 const char red_file[] = "res/red.bmp";
 const char shoot_file[] = "res/shoot.wav";
 const char startup_file[] = "res/startup.wav";
