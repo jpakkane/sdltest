@@ -38,7 +38,7 @@ const char blue_file[] = "res/blue.png";
 const char green_file[] = "res/green.jpg";
 const char red_file[] = "res/red.tif";
 const char shoot_file[] = "res/shoot.wav";
-const char startup_file[] = "res/startup.wav";
+const char startup_file[] = "res/startup.ogg";
 const char explode_file[] = "res/explode.wav";
 
 SDL_Texture* unpack_image(SDL_Renderer *rend, const char* fname) {

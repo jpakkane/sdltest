@@ -4,6 +4,7 @@
 /.pydevproject
 /build
 /.vscode
+*~
 
 /subprojects/SDL2-2.0.3/
 /subprojects/packagecache/
