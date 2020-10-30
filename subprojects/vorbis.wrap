@@ -1,15 +1,14 @@
 [wrap-file]
 directory = libvorbis-1.3.5
-
 source_url = http://downloads.xiph.org/releases/vorbis/libvorbis-1.3.5.tar.xz
 source_filename = libvorbis-1.3.5.tar.xz
 source_hash = 54f94a9527ff0a88477be0a71c0bab09a4c3febe0ed878b24824906cd4b0e1d1
-
-patch_url = https://wrapdb.mesonbuild.com/v1/projects/vorbis/1.3.5/5/get_zip
-patch_filename = vorbis-1.3.5-5-wrap.zip
-patch_hash = 2a0469612f70f6407774139b64672bc87f5b85d63237a1568df10e4e7ac66dd5
+patch_url = https://wrapdb.mesonbuild.com/v1/projects/vorbis/1.3.5/6/get_zip
+patch_filename = vorbis-1.3.5-6-wrap.zip
+patch_hash = b27a74c9e8983ec69b2186794d4d9882e4144be77c9f5a0ec758233b77e370b4
 
 [provide]
 vorbis = vorbis_dep
 vorbisfile = vorbisfile_dep
 vorbisenc = vorbisenc_dep
+
