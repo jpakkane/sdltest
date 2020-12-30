@@ -4,8 +4,8 @@ project('SDL test', 'cpp', version: '1.0.0',
                      'buildtype=debugoptimized'])
 
 sdl2_dep = dependency('sdl2')
-sdl2_image_dep = dependency('sdl2_image')
-sdl2_mixer_dep = dependency('sdl2_mixer')
+sdl2_image_dep = dependency('SDL2_image')
+sdl2_mixer_dep = dependency('SDL2_mixer')
 
 executable('sdltestapp', 'main.cpp',
   dependencies : [sdl2_image_dep, sdl2_mixer_dep, sdl2_dep],
