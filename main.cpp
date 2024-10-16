@@ -1,9 +1,9 @@
 /*
- * Copyright (c) 2015 Jussi Pakkanen.
+ * Copyright (c) 2019-2024 Jussi Pakkanen.
  *
- * This file is part of mcdemo.
+ * This file is part of sdltest.
  *
- * Mcdemo is free software; you can redistribute it and/or
+ * Sdltest is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License.
@@ -20,7 +20,7 @@
 
 #include<SDL.h>
 #include<SDL_image.h>
-#include<SDL_Mixer.h>
+#include<SDL_mixer.h>
 #include<cstdio>
 #include<cstdlib>
 #include<cassert>
@@ -114,7 +114,6 @@ struct resources {
         assert(blue_tex);
         assert(red_tex);
         assert(green_tex);
-        Uint8 *tmp = nullptr;
         startup_sound = unpack_wav(startup_file);
         shoot_sound = unpack_wav(shoot_file);
         explode_sound = unpack_wav(explode_file);
@@ -211,7 +210,7 @@ int main(int argc, char *argv[]) {
     }
     flags=MIX_INIT_OGG;
     initted=Mix_Init(flags);
-    if(initted&flags != flags) {
+    if((initted&flags) != flags) {
         printf("Mix_Init: Failed to init required ogg and mod support!\n");
         printf("Mix_Init: %s\n", Mix_GetError());
         return 1;
