@@ -44,7 +44,7 @@ const char explode_file[] = "res/explode.wav";
 SDL_Texture* unpack_image(SDL_Renderer *rend, const char* fname) {
     SDL_Surface *s = IMG_Load(fname);
     if(!s) {
-        printf("IMG_Load: %s\n", IMG_GetError());
+        printf("IMG_Load %s: %s\n", fname, IMG_GetError());
         std::abort();
     }
     SDL_Texture *tex = SDL_CreateTextureFromSurface(rend, s);
@@ -191,9 +191,6 @@ void mainloop(SDL_Window *win, SDL_Renderer *rend, audiocontrol &control) {
     }
 }
 
-#ifdef __cplusplus
-extern "C"
-#endif
 
 int main(int argc, char *argv[]) {
     if(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS | SDL_INIT_GAMECONTROLLER |
